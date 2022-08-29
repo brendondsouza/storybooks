@@ -16,16 +16,28 @@ require('./config/passport')(passport)
 
 // Run the function to make the connection to the DB which has been imported
 connectDB()
-
+ 
 const app = express()
+
+// Body parser
+app.use(express.urlencoded({ extended: false})) // get better understanding of this two
+app.use(express.json())
 
 // Logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'))
 }
 
+// Handlebars helpers
+const {formatDate, truncate, stripTags } = require('./helpers/hbs')
+
 // Handlebars
 app.engine('.hbs', exphbs.engine({
+    helpers: {
+      formatDate,
+      stripTags,
+      truncate,
+    },
     defaultLayout: 'main',
     extname: '.hbs',
   })
@@ -53,9 +65,10 @@ app.use(express.static(path.join(__dirname, 'public'))) // Define the path to th
 // Routes
 app.use('/', require('./routes/index.js'))
 app.use('/auth', require('./routes/auth'))
+app.use('/stories', require('./routes/stories'))
 
 const PORT = process.env.PORT || 8000
-
+ 
 app.listen(
   PORT,
   console.log(`Server running in ${process.env.NODE_ENV} mode on PORT ${PORT}`)
